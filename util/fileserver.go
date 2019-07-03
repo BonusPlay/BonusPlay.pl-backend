@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"io/ioutil"
@@ -9,7 +9,7 @@ import (
 
 func ServeFile(name string, w http.ResponseWriter) {
 	if data, err := ioutil.ReadFile(name); err == nil {
-		w.Write(data)
+		_, _ = w.Write(data)
 	} else {
 		log.Fatal(err)
 	}

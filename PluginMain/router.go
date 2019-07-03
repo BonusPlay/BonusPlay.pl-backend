@@ -25,15 +25,15 @@ func (p Router) Run() (err error) {
 	router.Use(middleware.Recoverer)
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		ServeFile("main_files/index.html", w)
+		util.ServeFile("main_files/index.html", w)
 	})
 
 	router.Get("/cv_en", func(w http.ResponseWriter, r *http.Request) {
-		ServeFile("main_files/cv_en.pdf", w)
+		util.ServeFile("main_files/cv_en.pdf", w)
 	})
 
 	router.Get("/cv_pl", func(w http.ResponseWriter, r *http.Request) {
-		ServeFile("main_files/cv_pl.pdf", w)
+		util.ServeFile("main_files/cv_pl.pdf", w)
 	})
 
 	router.Get("/github", http.RedirectHandler("https://github.com/BonusPlay", 301).ServeHTTP)
@@ -45,7 +45,7 @@ func (p Router) Run() (err error) {
 	workDir, _ := os.Getwd()
 	staticDir := filepath.Join(workDir, "main_files")
 	log.Debug()
-	router.Get("/*", NoDirListingHandler(http.FileServer(http.Dir(staticDir))).ServeHTTP)
+	router.Get("/*", util.NoDirListingHandler(http.FileServer(http.Dir(staticDir))).ServeHTTP)
 
 	log.Info("Starting main on port 3010")
 	server = http.Server{
