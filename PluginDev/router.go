@@ -25,15 +25,15 @@ func (p Router) Run() (err error) {
 	router.Use(middleware.Recoverer)
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		util.ServeFile("main_files/index.html", w)
+		util.ServeFile("dev_files/index.html", w)
 	})
 
 	router.Get("/cv_en", func(w http.ResponseWriter, r *http.Request) {
-		util.ServeFile("main_files/cv_en.pdf", w)
+		util.ServeFile("dev_files/cv_en.pdf", w)
 	})
 
 	router.Get("/cv_pl", func(w http.ResponseWriter, r *http.Request) {
-		util.ServeFile("main_files/cv_pl.pdf", w)
+		util.ServeFile("dev_files/cv_pl.pdf", w)
 	})
 
 	router.Get("/github", http.RedirectHandler("https://github.com/BonusPlay", 301).ServeHTTP)
