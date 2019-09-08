@@ -59,4 +59,5 @@ func (p Router) Cancel() {
 }
 
 // exported plugin
+//noinspection GoUnusedGlobalVariable
 var Plugin Router
