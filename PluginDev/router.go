@@ -2,17 +2,17 @@ package main
 
 import (
 	"context"
+	"net/http"
+	"os"
+	"path/filepath"
+
 	"github.com/BonusPlay/VueHoster/util"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"os"
-	"path/filepath"
 )
 
-type Router struct
-{}
+type Router struct{}
 
 var server http.Server
 
@@ -45,12 +45,13 @@ func (p Router) Run() (err error) {
 	// static files
 	workDir, _ := os.Getwd()
 	staticDir := filepath.Join(workDir, "dev_files")
-	log.Debug()
-	router.Get("/*", util.NoDirListingHandler(http.FileServer(http.Dir(staticDir))).ServeHTTP)
+	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		util.ServeFile("dev_files/index.html", w)
+	})
 
 	log.Info("Starting main on port 3011")
 	server = http.Server{
-		Addr: ":3011",
+		Addr:    ":3011",
 		Handler: router,
 	}
 	return server.ListenAndServe()
