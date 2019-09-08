@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/BonusPlay/VueHoster/util"
 	"github.com/go-chi/chi"
@@ -43,8 +41,6 @@ func (p Router) Run() (err error) {
 	router.Get("/asktoask", http.RedirectHandler("https://www.youtube.com/watch?v=53zkBvL4ZB4", 301).ServeHTTP)
 
 	// static files
-	workDir, _ := os.Getwd()
-	staticDir := filepath.Join(workDir, "dev_files")
 	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		util.ServeFile("dev_files/index.html", w)
 	})
