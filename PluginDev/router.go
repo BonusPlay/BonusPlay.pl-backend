@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"net/http"
-
 	"github.com/BonusPlay/VueHoster/util"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net/http"
 )
 
 type Router struct{}
@@ -42,10 +42,17 @@ func (p Router) Run() (err error) {
 
 	// static files
 	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
-		util.ServeFile("dev_files/index.html", w)
+
+		log.Info("dev_files" + r.URL.Path)
+
+		if data, err := ioutil.ReadFile("dev_files" + r.URL.Path); err == nil {
+			_, _ = w.Write(data)
+		} else {
+			http.ServeFile(w, r, "dev_files/index.html")
+		}
 	})
 
-	log.Info("Starting main on port 3011")
+	log.Info("Starting dev on port 3011")
 	server = http.Server{
 		Addr:    ":3011",
 		Handler: router,

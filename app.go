@@ -36,7 +36,6 @@ func main() {
 		})
 		log.SetLevel(log.DebugLevel)
 	}
-	log.SetLevel(log.DebugLevel)
 
 	log.Debug("currentDir:", currentDir)
 	log.Debug("pluginsDir:", pluginsDir)
