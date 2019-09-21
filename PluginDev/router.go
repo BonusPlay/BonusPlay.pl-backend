@@ -42,7 +42,7 @@ func (p Router) Run() (err error) {
 	router.Get("/asktoask", http.RedirectHandler("https://www.youtube.com/watch?v=53zkBvL4ZB4", 301).ServeHTTP)
 
 	workDir, _ := os.Getwd()
-	staticDir := filepath.Join(workDir, "main_files")
+	staticDir := filepath.Join(workDir, "dev_files")
 
 	// static files
 	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
