@@ -46,7 +46,6 @@ func (p Router) Run() (err error) {
 	// static files
 	workDir, _ := os.Getwd()
 	staticDir := filepath.Join(workDir, "main_files")
-	log.Debug()
 	router.Get("/*", util.NoDirListingHandler(http.FileServer(http.Dir(staticDir))).ServeHTTP)
 
 	log.Info("Starting main on port 3010")

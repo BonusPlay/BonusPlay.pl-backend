@@ -6,8 +6,9 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 type Router struct{}
@@ -40,15 +41,18 @@ func (p Router) Run() (err error) {
 	router.Get("/youtube", http.RedirectHandler("https://www.youtube.com/user/adamklis1975", 301).ServeHTTP)
 	router.Get("/asktoask", http.RedirectHandler("https://www.youtube.com/watch?v=53zkBvL4ZB4", 301).ServeHTTP)
 
+	workDir, _ := os.Getwd()
+	staticDir := filepath.Join(workDir, "main_files")
+
 	// static files
 	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 
 		log.Info("dev_files" + r.URL.Path)
 
-		if data, err := ioutil.ReadFile("dev_files" + r.URL.Path); err == nil {
-			_, _ = w.Write(data)
-		} else {
+		if _, err := os.Stat("dev_files" + r.URL.Path); os.IsNotExist(err) {
 			http.ServeFile(w, r, "dev_files/index.html")
+		} else {
+			http.FileServer(http.Dir(staticDir))
 		}
 	})
 
