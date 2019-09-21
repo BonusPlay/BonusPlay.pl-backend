@@ -52,7 +52,7 @@ func (p Router) Run() (err error) {
 		if _, err := os.Stat("dev_files" + r.URL.Path); os.IsNotExist(err) {
 			http.ServeFile(w, r, "dev_files/index.html")
 		} else {
-			http.FileServer(http.Dir(staticDir))
+			http.FileServer(http.Dir(staticDir)).ServeHTTP(w, r)
 		}
 	})
 
