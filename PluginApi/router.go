@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -16,6 +17,13 @@ var server http.Server
 func (p Router) Run() (err error) {
 	router := chi.NewRouter()
 
+	router.Use(cors.New(cors.Options{
+		AllowedOrigins: 	[]string{"https://*.bonusplay.pl"},
+		AllowedMethods: 	[]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: 	[]string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: 	true,
+		MaxAge: 300, // Maximum value not ignored by any of major browsers
+	}).Handler)
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Logger)
