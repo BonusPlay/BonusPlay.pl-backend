@@ -42,11 +42,22 @@ func (p Router) Run() (err error) {
 	router.Get("/youtube", http.RedirectHandler("https://www.youtube.com/user/adamklis1975", 301).ServeHTTP)
 	router.Get("/asktoask", http.RedirectHandler("https://www.youtube.com/watch?v=53zkBvL4ZB4", 301).ServeHTTP)
 	router.Get("/why", http.RedirectHandler("https://www.youtube.com/watch?v=VPpIjhtgGj0", 301).ServeHTTP)
+	router.Get("/linkedin", http.RedirectHandler("https://www.linkedin.com/in/adam-kliś", 301).ServeHTTP)
 
 	// static files
 	workDir, _ := os.Getwd()
 	staticDir := filepath.Join(workDir, "main_files")
-	router.Get("/*", util.NoDirListingHandler(http.FileServer(http.Dir(staticDir))).ServeHTTP)
+
+	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+
+		log.Info("main_files" + r.URL.Path)
+
+		if _, err := os.Stat("main_files" + r.URL.Path); os.IsNotExist(err) {
+			http.ServeFile(w, r, "main_files/index.html")
+		} else {
+			http.FileServer(http.Dir(staticDir)).ServeHTTP(w, r)
+		}
+	})
 
 	log.Info("Starting main on port 3010")
 	server = http.Server{
