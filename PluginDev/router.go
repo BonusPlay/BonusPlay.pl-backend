@@ -40,6 +40,7 @@ func (p Router) Run() (err error) {
 	router.Get("/discord", http.RedirectHandler("https://discordapp.com/invite/tYk4PW5", 301).ServeHTTP)
 	router.Get("/youtube", http.RedirectHandler("https://www.youtube.com/user/adamklis1975", 301).ServeHTTP)
 	router.Get("/asktoask", http.RedirectHandler("https://www.youtube.com/watch?v=53zkBvL4ZB4", 301).ServeHTTP)
+	router.Get("/linkedin", http.RedirectHandler("https://www.linkedin.com/in/adam-kliś", 301).ServeHTTP)
 
 	workDir, _ := os.Getwd()
 	staticDir := filepath.Join(workDir, "dev_files")
