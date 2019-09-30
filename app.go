@@ -21,26 +21,11 @@ var (
 	g errgroup.Group
 	currentDir string
 	pluginsDir string
-	plugins []Plugin
+	plugins map[string]Plugin
 )
 
 func main() {
-	log.Info("Starting VueHoster")
-
-	ex, _ := os.Executable()
-	currentDir = filepath.Dir(ex)
-	pluginsDir = path.Join(currentDir, "plugins")
-	if *flag.Bool("debug", false, "enables logging of debug") {
-		log.SetFormatter(&log.TextFormatter{
-			FullTimestamp: true,
-		})
-		log.SetLevel(log.DebugLevel)
-	}
-
-	log.Debug("currentDir:", currentDir)
-	log.Debug("pluginsDir:", pluginsDir)
-
-	handlePlugins()
+	startup()
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -57,8 +42,8 @@ func main() {
 		for {
 			select {
 			case event:= <-watcher.Events:
-				log.Debug("FS:", event)
-				handlePlugins()
+				log.Debug("FS:", event.String())
+				updatePlugin(event.Name)
 
 			case err := <-watcher.Errors:
 				log.Fatal("Error received from file watcher", err)
@@ -66,22 +51,30 @@ func main() {
 		}
 	})
 
-	// init plugin scan
-	handlePlugins()
-
 	if err := g.Wait(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func handlePlugins() {
-	if len(plugins) != 0 {
-		log.Info("Shutting down all plugins")
+func startup() {
+	log.Info("Starting VueHoster")
 
-		for _, plug := range plugins {
-			plug.Cancel()
-		}
+	plugins = make(map[string]Plugin)
+	ex, _ := os.Executable()
+	currentDir = filepath.Dir(ex)
+	pluginsDir = path.Join(currentDir, "plugins")
+
+	debugFlag := flag.Bool("debug", false, "enables logging of debug")
+	flag.Parse()
+	if *debugFlag {
+		log.SetFormatter(&log.TextFormatter{
+			FullTimestamp: true,
+		})
+		log.SetLevel(log.DebugLevel)
 	}
+
+	log.Debug("currentDir:", currentDir)
+	log.Debug("pluginsDir:", pluginsDir)
 
 	log.Info("Scanning for plugins")
 
@@ -91,35 +84,44 @@ func handlePlugins() {
 	}
 
 	for _, f := range files {
-		if filepath.Ext(f.Name()) == ".so" {
-			log.Debug("Found plugin:", f.Name())
+		loadPlugin(f.Name())
+	}
+}
 
-			// open the so file to load the symbols
-			symbols, err := plugin.Open(path.Join(pluginsDir, f.Name()))
-			if err != nil {
-				log.Fatal("Failed to open plugin", err)
-			}
+func updatePlugin(name string) {
+	plug, exists := plugins[name]
 
-			// look up a symbol
-			symb, err := symbols.Lookup("Plugin")
-			if err != nil {
-				log.Fatal("Plugin does not contain required functions")
-			}
-
-			// assert symbol has correct type
-			var plug Plugin
-			plug, ok := symb.(Plugin)
-			if !ok {
-				log.Fatal("unexpected type from plugin symbol")
-			}
-
-			plugins = append(plugins, plug)
-		}
+	if exists {
+		plug.Cancel()
 	}
 
-	log.Info("Running all plugins")
+	loadPlugin(name)
+}
 
-	for _, plug := range plugins {
+func loadPlugin(name string) {
+	if filepath.Ext(name) == ".so" {
+		log.Debug("Plugin plugin:", name)
+
+		// open the so file to load the symbols
+		symbols, err := plugin.Open(path.Join(pluginsDir, name))
+		if err != nil {
+			log.Fatal("Failed to open plugin", err)
+		}
+
+		// look up a symbol
+		symb, err := symbols.Lookup("Plugin")
+		if err != nil {
+			log.Fatal("Plugin does not contain required functions")
+		}
+
+		// assert symbol has correct type
+		var plug Plugin
+		plug, ok := symb.(Plugin)
+		if !ok {
+			log.Fatal("unexpected type from plugin symbol")
+		}
+
+		plugins[name] = plug
 		g.Go(plug.Run)
 	}
 }
